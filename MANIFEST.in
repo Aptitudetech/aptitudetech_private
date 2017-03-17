@@ -1,0 +1,18 @@
+include MANIFEST.in
+include requirements.txt
+include *.json
+include *.md
+include *.py
+include *.txt
+recursive-include aptitudetech_private *.css
+recursive-include aptitudetech_private *.csv
+recursive-include aptitudetech_private *.html
+recursive-include aptitudetech_private *.ico
+recursive-include aptitudetech_private *.js
+recursive-include aptitudetech_private *.json
+recursive-include aptitudetech_private *.md
+recursive-include aptitudetech_private *.png
+recursive-include aptitudetech_private *.py
+recursive-include aptitudetech_private *.svg
+recursive-include aptitudetech_private *.txt
+recursive-exclude aptitudetech_private *.pyc
