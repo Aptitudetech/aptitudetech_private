@@ -55,6 +55,7 @@ class AwsTransaction(Document):
                 pi.is_return = False
                 pi.due_date =  datetime.date.today()
                 pi.bill_date = datetime.date.today()
+		pi.bill_no = "test12345"
                 pi.company = "Aptitude Technologies"
                 pi.currency = "CAD"
                 pi.conversion_rate = "1"
@@ -129,7 +130,7 @@ class AwsTransaction(Document):
                                         "base_net_total" : 0,
                                         "base_grand_total" : 0,
                                         "grand_total" : 0,
-                                        "debit_to" : "1111 - Debtors - AT",
+                                        "debit_to" : "1111 - Debtors CDN - AT",
                                         "customer" : customer,
                                         "taxes_and_charges": "Quebec - Taxes - AT",
                                 }
@@ -181,7 +182,7 @@ class AwsTransaction(Document):
                                                 "qty": "1",
                                                 "stock_uom":"Unit"
                                         })
-					total_purchase_invoice = total_purchase_invoice + (Decimal(total[key]) * Decimal(self.change_rate))
+					total_purchase_invoice = total_purchase_invoice + (Decimal(total[key]) * Decimal(exchange_rate))
 				#Section des item synnex
 				if mri.snx_eu_no:
 					frappe.msgprint(customer)
