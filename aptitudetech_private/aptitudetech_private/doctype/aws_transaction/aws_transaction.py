@@ -304,7 +304,7 @@ class AwsTransaction(Document):
 		
 		json_obj=json.loads(response.text)
 
-		url = 'https://ws.synnex.ca/webservice/solutions/csp/license'
+		url = 'https://ws.synnex.ca/webservice/solutions/csp'
 		
 		headers = {
 				"Authorization" : "Bearer %s" %json_obj["access_token"].encode("ascii","ignore"),
@@ -316,11 +316,15 @@ class AwsTransaction(Document):
 			"snx_eu_no" : snx_eu_no,
 		}
 
+		frappe.msgprint("url :" + str(url))
+		frappe.msgprint("headers :" + str(headers))
+		frappe.msgprint("data :" + str(data))
+
 		response = s.post(url, json=data, headers=headers)
 		
 		data = json.loads(response.text.decode('utf-8'))
 		
-		frappe.msgprint(json.dumps(data))
+		#frappe.msgprint(json.dumps(data))
 		
 		item_synnex = {
 			"iphone" : 2007
