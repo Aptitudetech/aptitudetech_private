@@ -40,9 +40,9 @@ class AwsTransaction(Document):
                 suffix = frappe.db.get_value("Monthly Recurring Setup", None, "sales_invoice_title_suffix")
 		exchange_rate = frappe.db.get_value("Monthly Recurring Setup", None, "exchange_rate")
 		if exchange_rate == None:
-			frappe.msgprint("VIDE ")
-		else:
-			frappe.msgprint(exchange_rate)
+			frappe.msgprint("Exchange rate not set")
+#		else:
+#			frappe.msgprint(exchange_rate)
 
 		pi = frappe.new_doc("Purchase Invoice")
 		total_purchase_invoice = Decimal(0)
@@ -122,20 +122,20 @@ class AwsTransaction(Document):
                                         "naming_series": "SINV-AUTO-",
                                         "posting_date": datetime.date.today(),
                                         "company" : "Aptitude Technologies",
-                                        "currency" : "CAD",
-                                        "conversion_rate" : "1",
-                                        "selling_price_list" : "Selling - Standard",
-                                        "price_list_currency" : "CAD",
-                                        "plc_conversion_rate" : "1",
-                                        "base_net_total" : 0,
-                                        "base_grand_total" : 0,
-                                        "grand_total" : 0,
-                                        "debit_to" : "1111 - Debtors CDN - AT",
+                                        "currency" : frappe.db.get_value("Customer", customer, "default_currency"),
+#                                        "conversion_rate" : "1",
+#                                        "selling_price_list" : "Selling - Standard",
+#                                        "price_list_currency" : "CAD",
+#                                        "plc_conversion_rate" : "1",
+#                                        "base_net_total" : 0,
+#                                        "base_grand_total" : 0,
+#                                        "grand_total" : 0,
+#                                        "debit_to" : "1111 - Debtors CDN - AT",
                                         "customer" : customer,
-                                        "taxes_and_charges": "Quebec - Taxes - AT",
+#                                        "taxes_and_charges": "Quebec - Taxes - AT",
                                 }
-                                si.set_taxes()
                                 si.update (json_update)
+				si.set_taxes()
 
 				#Section des item amazon
 				if mri.aws_account_id:
@@ -153,16 +153,21 @@ class AwsTransaction(Document):
 						list_server[key] += "</li>"
 						list_server[key] = str(list_server[key]).replace("<li></li>", "")
 						description = description.replace("--SERVER--", str(list_server[key]))
+#					frappe.msgprint(frappe.db.get_value("Customer", customer, "default_currency"))
+					if frappe.db.get_value("Customer", customer, "default_currency") == "USD":
+						rate = round(total[key] * Decimal(reseller_margin),2)
+					else:
+						rate = round(total[key] * Decimal(exchange_rate) * Decimal(reseller_margin),2)
 				
 					si.append("items",
                                 	{
 						"item_code": item,
                                         	"item_name": frappe.db.get_value("Item", item, "item_name"),
                                         	"description": description,
-                                        	"rate": round(total[key] * Decimal(exchange_rate) * Decimal(reseller_margin),2),
-                                        	"amount": round(total[key] * Decimal(exchange_rate) * Decimal(reseller_margin),2),
-                                        	"base_rate": round(total[key] * Decimal(exchange_rate) * Decimal(reseller_margin),2),
-                                        	"base_amount": round(total[key] * Decimal(exchange_rate) * Decimal(reseller_margin),2),
+                                        	"rate": rate,
+#                                        	"amount": round(total[key] * Decimal(exchange_rate) * Decimal(reseller_margin),2),
+#                                        	"base_rate": round(total[key] * Decimal(exchange_rate) * Decimal(reseller_margin),2),
+#                                        	"base_amount": round(total[key] * Decimal(exchange_rate) * Decimal(reseller_margin),2),
                                         	"income_account": "4181 - Service - General - AT",
                                         	"cost_center": "Main - AT",
                                         	"qty": "1",
@@ -185,13 +190,13 @@ class AwsTransaction(Document):
 					total_purchase_invoice = total_purchase_invoice + (Decimal(total[key]) * Decimal(exchange_rate))
 				#Section des item synnex
 				if mri.snx_eu_no:
-					frappe.msgprint(customer)
+#					frappe.msgprint(customer)
 					items_synnex = self.connect_sinnex(mri.snx_eu_no)
 					for key, val in items_synnex.items():
 						#frappe.get_doc("Monthly Recurring Item", {'supplier_part_no': val,'supplier':"Synnex"}).parent
 						item = frappe.db.get_value("Item Supplier", {'supplier_part_no': key,'supplier':"Synnex"}, "parent")
 						if item:
-							frappe.msgprint(item)
+#							frappe.msgprint(item)
 							description = frappe.db.get_value("Item", item, "description")
 							item_price = frappe.db.get_value("Item Price", {'price_list':price_list,'item_code':item}, "price_list_rate")
 							si.append("items",
@@ -316,9 +321,9 @@ class AwsTransaction(Document):
 			"snx_eu_no" : snx_eu_no,
 		}
 
-		frappe.msgprint("url :" + str(url))
-		frappe.msgprint("headers :" + str(headers))
-		frappe.msgprint("data :" + str(data))
+#		frappe.msgprint("url :" + str(url))
+#		frappe.msgprint("headers :" + str(headers))
+#		frappe.msgprint("data :" + str(data))
 
 		response = s.post(url, json=data, headers=headers)
 		
