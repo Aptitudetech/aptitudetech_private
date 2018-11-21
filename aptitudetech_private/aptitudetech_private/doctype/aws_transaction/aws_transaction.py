@@ -217,7 +217,9 @@ class AwsTransaction(Document):
 				#Section des items statiques
 				if mri.items:
 					for d in mri.items:
-						item_price = frappe.db.get_value("Item Price", {'price_list':price_list,'item_code':d.item}, "price_list_rate")
+						item_price = frappe.db.get_value("Item Price", {'price_list':price_list,'item_code':d.item}, "price_list_rate") or 0.0
+						if not item_price and d.item:
+							frappe.throw(frappe._('You need to setup one price for the item {0} at price list {1}').format(d.item, price_list))
 						if d.quantity == None :
 							quantity = 1
 						else:
