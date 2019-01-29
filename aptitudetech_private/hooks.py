@@ -70,13 +70,19 @@ app_license = "MIT"
 # ---------------
 # Hook on document methods and events
 
-# doc_events = {
+doc_events = {
+#	"Task": {
+#		"onload": "aptitudetech_private.events.on_issue_onload"
+#	}
+	"Issue": {
+		"validate" : "aptitudetech_private.events.on_issue_validate"
+	}
 # 	"*": {
 # 		"on_update": "method",
 # 		"on_cancel": "method",
 # 		"on_trash": "method"
 #	}
-# }
+}
 
 # Scheduled Tasks
 # ---------------
@@ -107,7 +113,7 @@ app_license = "MIT"
 # Overriding Whitelisted Methods
 # ------------------------------
 #
-# override_whitelisted_methods = {
-# 	"frappe.desk.doctype.event.event.get_events": "aptitudetech_private.event.get_events"
-# }
+#override_whitelisted_methods = {
+#	"frappe.desk.doctype.kanban_board.kanban_board.update_doc": "aptitudetech_private.events.kanban_update_doc"
+#}
 
