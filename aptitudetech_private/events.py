@@ -12,7 +12,16 @@ def on_issue_validate(doc, handler=None):
 
 	if doc.kanban_status == "Assigned" and frappe.db.get_value('Issue', doc.name, 'kanban_status') == "To Be Assigned":
 		doc.captured_assigned_time = doc.modified
-
+		todo = frappe.new_doc('ToDo')
+		todo.update({
+			'owner': frappe.session.user,
+			'reference_type' : 'Issue',
+			'reference_name' : doc.name,
+			'assigned_by': frappe.session.user,
+			'description': 'ToDo' 
+		})		
+		todo.flags.ignore_permissions = True
+		todo.save()
 	if doc.kanban_status == "Working" and frappe.db.get_value('Issue', doc.name, 'kanban_status') == "Assigned":
                 doc.captured_start_working_time = doc.modified
 		doc.reported_work_start_time = doc.captured_start_working_time

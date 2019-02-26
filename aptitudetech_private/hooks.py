@@ -58,13 +58,13 @@ app_license = "MIT"
 # -----------
 # Permissions evaluated in scripted ways
 
-# permission_query_conditions = {
-# 	"Event": "frappe.desk.doctype.event.event.get_permission_query_conditions",
-# }
-#
-# has_permission = {
-# 	"Event": "frappe.desk.doctype.event.event.has_permission",
-# }
+#permission_query_conditions = {
+# 	"Issue": "aptitudetech_private.permissions.get_issue_permissions_query_conditions",
+#}
+
+#has_permission = {
+#	"Issue": "aptitudetech_private.permissions.has_permission_to_issue",
+#}
 
 # Document Events
 # ---------------
@@ -87,10 +87,20 @@ doc_events = {
 # Scheduled Tasks
 # ---------------
 
-# scheduler_events = {
+scheduler_events = {
 # 	"all": [
 # 		"aptitudetech_private.tasks.all"
 # 	],
+#	"cron": {
+ 	"18 * * * *": [
+ 		"aptitudetech_private.tasks.daily"
+	]
+#	}
+#	"cron": {
+#	 	"18 * * * *": [
+#	 		"aptitudetech_private.tasks.daily"
+ #		]
+#	}
 # 	"daily": [
 # 		"aptitudetech_private.tasks.daily"
 # 	],
@@ -103,7 +113,7 @@ doc_events = {
 # 	"monthly": [
 # 		"aptitudetech_private.tasks.monthly"
 # 	]
-# }
+}
 
 # Testing
 # -------
