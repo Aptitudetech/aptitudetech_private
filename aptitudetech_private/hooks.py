@@ -127,3 +127,64 @@ scheduler_events = {
 #	"frappe.desk.doctype.kanban_board.kanban_board.update_doc": "aptitudetech_private.events.kanban_update_doc"
 #}
 
+fixtures = [
+{
+	"dt": "Custom Field",
+	"filters": {
+        	"name": ["in", [
+        	        "Project Task-end_time",
+             		"Project Task-start_time",
+             		"Issue-column_break_28",
+             		"Issue-kanban_status",
+             		"Issue-approved_work_end_time",
+             		"Issue-approved_work_start_time",
+             		"Issue-reported_work_end_time",
+             		"Issue-reported_work_start_time",
+             		"Issue-captured_end_working_time",
+             		"Issue-captured_start_working_time",
+             		"Issue-captured_assigned_time",
+             		"Issue-captured_incoming_time",
+             		"Issue-captured_times",
+             		"Issue-active_tickets",
+             		"Issue-other_links",
+             		"Issue-other_references",
+             		"Issue-services_html",
+             		"Issue-to_do",
+             		"Issue-tickets_links",
+             		"Issue-tickets_html",
+             		"Task-issue",
+             		"Issue-related_project",
+             		"Issue-tasks",
+             		"Issue-ticket_type",
+         	]]
+    	}
+},
+{
+	'dt': 'Workflow State',
+    	"filters": {
+        	"name": ["in", [
+        		"Approved",
+        	        "To Approve",
+             		"Rejected",
+         	]]
+    	}
+},
+{
+	'dt': 'Workflow Action',
+    	"filters": {
+        	"name": ["in", [
+             		"Approve",
+             		"Reject",
+         	]]
+    	}
+},
+{
+	'dt': 'Workflow',
+        "filters": {
+    		"name": ["in", [
+        	     "Simplified Time Sheet Approval",
+         	]]
+    	}
+
+},
+]
