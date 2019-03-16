@@ -60,7 +60,7 @@ class SimplifiedTimeReporting(Document):
 	def on_submit(self):
 		import json
 		import datetime
-		from frappe.utils import now_datetime
+		from frappe.utils import now_datetime, getdate
 
 		if self.workflow_state == 'Approved' or self.workflow_state == 'To Approve':
 			_now = now_datetime()
@@ -87,7 +87,33 @@ class SimplifiedTimeReporting(Document):
 					"posting_date" : datetime.datetime.now().date(),
 					"expenses" : expenses_list,
 					"company" : "Aptitude Technologies"
-				}).save()					
+				}).save()
+
+			for detail in self.get('timesheet_detail'):
+				if not detail.billable:
+					continue
+				service = frappe.db.get_value('Dynamic Link', {'parenttype': 'Issue', 'parent': detail.issue, 'link_doctype': 'Service'}, 'link_name')
+				if not service:
+					continue
+				service_plan = frappe.db.get_value('Service', service, 'service_plan')
+				metered_feature = frappe.db.get_value('Metered Feature', {'service_plan': service_plan})
+				if not metered_feature:
+					continue
+
+				args = {
+					'service': service,
+					'customer': frappe.db.get_value('Service', service, 'customer'),
+					'metered_feature': metered_feature,
+					'consumed_units': detail.hours,
+					'start_date': getdate(detail.from_time),
+					'end_date': getdate(detail.to_date),
+					'item_group': frappe.db.get_value('Employee', self.employee, 'employee_name'),
+					'item_code': detail.name,
+					'item_type': detail.activity_type,
+					'unit': 'Hours'
+				}
+				frappe.new_doc('Metered Feature Units Log').update(args).insert()
+					
 
 	def get_total_reported_time(self):
 		import json
