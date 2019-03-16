@@ -132,6 +132,7 @@ fixtures = [
 	"dt": "Custom Field",
 	"filters": {
         	"name": ["in", [
+			"Timesheet Detail-issue",
         	        "Project Task-end_time",
              		"Project Task-start_time",
              		"Issue-column_break_28",
@@ -152,7 +153,7 @@ fixtures = [
              		"Issue-to_do",
              		"Issue-tickets_links",
              		"Issue-tickets_html",
-             		"Task-issue",
+             		"Task-issue_id",
              		"Issue-related_project",
              		"Issue-tasks",
              		"Issue-ticket_type",
@@ -163,6 +164,7 @@ fixtures = [
 	'dt': 'Workflow State',
     	"filters": {
         	"name": ["in", [
+        		"Draft",
         		"Approved",
         	        "To Approve",
              		"Rejected",
@@ -175,6 +177,7 @@ fixtures = [
         	"name": ["in", [
              		"Approve",
              		"Reject",
+			"To Approve",
          	]]
     	}
 },

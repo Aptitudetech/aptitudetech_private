@@ -116,7 +116,7 @@ class SimplifiedTimeReporting(Document):
 			if issue['_assign'] and "mraymond@aptitudetech.net" in issue['_assign']:
 #			if issue['_assign'] and frappe.session.user in issue['_assign']:
 #				project ==== an issue can be related to multiple task, so we don't know which project is related
-				issue.project = frappe.db.get_value('Task', {'issue_id' : issue['name']}, 'project')
+				issue.project = frappe.db.get_value('Task', {'issue' : issue['name']}, 'project')
 				self_issues.append(issue)
 
 		return json.loads(str(frappe.as_json(self_issues)))

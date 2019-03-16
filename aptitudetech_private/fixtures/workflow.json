@@ -4,11 +4,20 @@
   "doctype": "Workflow", 
   "document_type": "Simplified Time Reporting", 
   "is_active": 1, 
-  "modified": "2019-03-16 10:48:49.208217", 
+  "modified": "2019-03-16 13:06:53.731043", 
   "name": "Simplified Time Sheet Approval", 
   "override_status": 0, 
   "send_email_alert": 0, 
   "states": [
+   {
+    "allow_edit": "All", 
+    "doc_status": "0", 
+    "message": null, 
+    "next_action_email_template": null, 
+    "state": "Draft", 
+    "update_field": null, 
+    "update_value": null
+   }, 
    {
     "allow_edit": "All", 
     "doc_status": "1", 
@@ -44,13 +53,29 @@
     "allowed": "All", 
     "condition": "doc.total_captured_time >= doc.total_reported_time", 
     "next_state": "Approved", 
-    "state": "Approved"
+    "state": "Draft"
+   }, 
+   {
+    "action": "To Approve", 
+    "allow_self_approval": 1, 
+    "allowed": "All", 
+    "condition": "doc.total_captured_time < doc.total_reported_time", 
+    "next_state": "To Approve", 
+    "state": "Draft"
+   }, 
+   {
+    "action": "Approve", 
+    "allow_self_approval": 1, 
+    "allowed": "All", 
+    "condition": "doc.total_captured_time < doc.total_reported_time", 
+    "next_state": "Approved", 
+    "state": "To Approve"
    }, 
    {
     "action": "Reject", 
     "allow_self_approval": 1, 
     "allowed": "All", 
-    "condition": "doc.total_captured_time < doc.total_reported_time", 
+    "condition": null, 
     "next_state": "Rejected", 
     "state": "To Approve"
    }

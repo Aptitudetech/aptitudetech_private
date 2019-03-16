@@ -25,8 +25,7 @@ class SimplifiedTimeReporting(Document):
 				self.add_timesheet_rows(remaining_issues)
 
 		except AttributeError:
-			self.employee = frappe.db.get_value("Employee", {"user_id" : "mraymond@aptitudetech.net"}, "name")
-#			self.employee = frappe.db.get_value("Employee", {"user_id" : frappe.session.user}, "name")
+			self.employee = frappe.db.get_value("Employee", {"user_id" : frappe.session.user}, "name")
 			self.add_timesheet_rows(issues)
 
 	def add_timesheet_rows(self, issues = []):
@@ -66,28 +65,29 @@ class SimplifiedTimeReporting(Document):
 		if self.workflow_state == 'Approved' or self.workflow_state == 'To Approve':
 			_now = now_datetime()
 			expenses_list = []
-			data = json.loads(str(frappe.as_json(self.expenses))) #need to be as_json, otherwhise the json won't load because of the datetime attribute
-			for expense in data:
-				try:
-					description = expense["description"]
-				except:
-					description = ""
-				exp = {
-					'expense_date' : expense['date'],
-					'expense_type' : expense['reason'],
-					'description' : description,
-					'claim_amount' : expense['claim_amount'],
-					'sanctioned_amount' : expense['claim_amount']
-				}
-				expenses_list.append(exp)
+			if self.expenses:
+				data = json.loads(str(frappe.as_json(self.expenses))) #need to be as_json, otherwhise the json won't load because of the datetime attribute
+				for expense in data:
+					try:
+						description = expense["description"]
+					except:
+						description = ""
+					exp = {
+						'expense_date' : expense['date'],
+						'expense_type' : expense['reason'],
+						'description' : description,
+						'claim_amount' : expense['claim_amount'],
+						'sanctioned_amount' : expense['claim_amount']
+					}
+					expenses_list.append(exp)
 
-			frappe.new_doc('Expense Claim').update({ 
-	                	"employee": self.employee,
-				"approval_status" : "Draft",
-				"posting_date" : datetime.datetime.now().date(),
-				"expenses" : expenses_list,
-				"company" : "Aptitude Technologies"
-			}).save()					
+				frappe.new_doc('Expense Claim').update({ 
+		                	"employee": self.employee,
+					"approval_status" : "Draft",
+					"posting_date" : datetime.datetime.now().date(),
+					"expenses" : expenses_list,
+					"company" : "Aptitude Technologies"
+				}).save()					
 
 	def get_total_reported_time(self):
 		import json
@@ -144,9 +144,8 @@ class SimplifiedTimeReporting(Document):
 
 		for issue in closed_issues:
 			
-			if issue['_assign'] and "mraymond@aptitudetech.net" in issue['_assign']:
-#			if issue['_assign'] and frappe.session.user in issue['_assign']:
-				issue.project = frappe.db.get_value('Task', {'issue_id' : issue['name']}, 'project')
+			if issue['_assign'] and frappe.session.user in issue['_assign']:
+				issue.project = frappe.db.get_value('Task', {'issue' : issue['name']}, 'project')
 				self_issues.append(issue)
 
 		return json.loads(str(frappe.as_json(self_issues)))
