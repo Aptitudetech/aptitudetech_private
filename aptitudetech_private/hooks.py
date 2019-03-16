@@ -58,33 +58,49 @@ app_license = "MIT"
 # -----------
 # Permissions evaluated in scripted ways
 
-# permission_query_conditions = {
-# 	"Event": "frappe.desk.doctype.event.event.get_permission_query_conditions",
-# }
-#
-# has_permission = {
-# 	"Event": "frappe.desk.doctype.event.event.has_permission",
-# }
+#permission_query_conditions = {
+# 	"Issue": "aptitudetech_private.permissions.get_issue_permissions_query_conditions",
+#}
+
+#has_permission = {
+#	"Issue": "aptitudetech_private.permissions.has_permission_to_issue",
+#}
 
 # Document Events
 # ---------------
 # Hook on document methods and events
 
-# doc_events = {
+doc_events = {
+#	"Task": {
+#		"onload": "aptitudetech_private.events.on_issue_onload"
+#	}
+	"Issue": {
+		"validate" : "aptitudetech_private.events.on_issue_validate"
+	}
 # 	"*": {
 # 		"on_update": "method",
 # 		"on_cancel": "method",
 # 		"on_trash": "method"
 #	}
-# }
+}
 
 # Scheduled Tasks
 # ---------------
 
-# scheduler_events = {
+scheduler_events = {
 # 	"all": [
 # 		"aptitudetech_private.tasks.all"
 # 	],
+#	"cron": {
+ 	"18 * * * *": [
+ 		"aptitudetech_private.tasks.daily"
+	]
+#	}
+#	"cron": {
+#	 	"18 * * * *": [
+#	 		"aptitudetech_private.tasks.daily"
+ #		]
+#	}
 # 	"daily": [
 # 		"aptitudetech_private.tasks.daily"
 # 	],
@@ -97,7 +113,7 @@ app_license = "MIT"
 # 	"monthly": [
 # 		"aptitudetech_private.tasks.monthly"
 # 	]
-# }
+}
 
 # Testing
 # -------
@@ -107,7 +123,7 @@ app_license = "MIT"
 # Overriding Whitelisted Methods
 # ------------------------------
 #
-# override_whitelisted_methods = {
-# 	"frappe.desk.doctype.event.event.get_events": "aptitudetech_private.event.get_events"
-# }
+#override_whitelisted_methods = {
+#	"frappe.desk.doctype.kanban_board.kanban_board.update_doc": "aptitudetech_private.events.kanban_update_doc"
+#}
 

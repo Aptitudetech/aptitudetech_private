@@ -1,0 +1,124 @@
+
+# -*- coding: utf-8 -*-
+# Copyright (c) 2019, Aptitudetech and contributors
+# For license information, please see license.txt
+
+from __future__ import unicode_literals
+import frappe
+from frappe import _
+from frappe.model.document import Document
+
+class SimplifiedTimeReporting(Document):
+
+
+	def onload_post_render(self):
+		#https://stackoverflow.com/a/610923/8291000
+		try:
+			if self.timesheet_detail:
+				pass    			
+		except AttributeError:
+			self.employee = frappe.db.get_value("Employee", {"user_id" : "mraymond@aptitudetech.net"}, "name")
+#			self.employee = frappe.db.get_value("Employee", {"user_id" : frappe.session.user}, "name")
+                        issues = self.load_closed_issues()
+			self.load_timesheet_table(issues)
+
+	def before_save(self):
+		import json, datetime
+		self.total_reported_time = self.get_total_reported_time()
+                self.total_captured_time = self.get_total_captured_time()
+
+	def after_save(self):
+		import json, datetime
+
+		if state == 'Approved' or state == 'To Approve':
+			expenses_list = []
+			data = json.loads(str(frappe.as_json(self.expenses))) #need to be as_json, otherwhise the json won't load because of the datetime attribute
+			for expense in data:
+				frappe.msgprint(_("{0}").format(frappe.as_json(expense)))
+				frappe.msgprint(_("{0}").format(expense['description']))
+				exp = {
+					'expense_date' : expense['date'],
+					'expense_type' : expense['reason'],
+					'description' : expense['description'] if expense['description'] else None,
+					'claim_amount' : expense['claim_amount'],
+					'sanctioned_amount' : expense['claim_amount']
+				}
+				expenses_list.append(exp)
+
+	#		frappe.new_doc('Expense Claim').update({ 
+	 #               	"employee": self.employee,
+	#			"approval_status" : "Draft",
+	#			"posting_date" : datetime.datetime.now().date(),
+	#			"expenses" : expenses_list,
+	#			"company" : "Aptitude Technologies"
+	#		}).save()					
+
+#		frappe.throw("Submit")
+#		doc.save()
+
+	def get_total_reported_time(self):
+		import json
+		total_reported_time = 0
+		issues = json.loads(str(frappe.as_json(self.timesheet_detail)))
+
+		for issue in issues:
+			total_reported_time = total_reported_time + issue['hours']
+		return total_reported_time
+
+
+	def get_total_captured_time(self):
+		import datetime
+		total_captured_time = 0
+		issues = self.load_closed_issues()		
+		
+		for issue in issues:
+			frappe.msgprint(_(issue))
+
+			diff_time = round(int((issue['captured_end_working_time'] - issue['captured_start_working_time']).total_seconds())/3600, 1)		
+			total_captured_time = total_captured_time + diff_time
+		return total_captured_time
+
+
+	def load_timesheet_table(self, issues = []):
+		import datetime
+		if issues:
+			for issue in issues:
+				frappe.msgprint(_("end json: {0}").format(issue['reported_work_end_time']))
+				diff_time = round(int((issue['reported_work_end_time'] - issue['reported_work_start_time']).total_seconds())/3600, 1)
+				detail = {
+					'from_time': issue['reported_work_start_time'], 
+					'to_time': issue['reported_work_end_time'], 
+					'note' : issue['description'],
+					'project' : issue['project'] if issue['project'] else None,
+					'hours' : diff_time
+				}
+				self.append("timesheet_detail", detail)
+
+
+	def load_closed_issues(self):
+		import datetime, json
+
+		cur_month = datetime.datetime.now().strftime("%m")
+		cur_year = datetime.datetime.now().strftime("%Y")
+		next_month = int(cur_month) + 1
+		next_year = cur_year
+		if next_month == 13:
+			next_month = 1
+			next_year = int(next_year) + 1
+		start_date = "{0}-{1}-01".format(cur_year, cur_month) 
+		end_date = "{0}-{1}-01".format(next_year, next_month)
+		closed_issues = frappe.db.get_all("Issue", {"kanban_status" : "Completed", "reported_work_start_time" : [ ">=", start_date ], "reported_work_end_time" : [ "<=", end_date ]},['_assign, name, reported_work_start_time, reported_work_end_time, description, captured_start_working_time, captured_end_working_time'])
+
+		self_issues = []
+
+		for issue in closed_issues:
+			
+			if issue['_assign'] and "mraymond@aptitudetech.net" in issue['_assign']:
+#			if issue['_assign'] and frappe.session.user in issue['_assign']:
+#				project ==== an issue can be related to multiple task, so we don't know which project is related
+				issue.project = frappe.db.get_value('Task', {'issue_id' : issue['name']}, 'project')
+				self_issues.append(issue)
+
+		return json.loads(str(frappe.as_json(self_issues)))
+#		return self_issues
+				
