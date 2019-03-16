@@ -18,12 +18,8 @@ class SimplifiedTimeReporting(Document):
 		remaining_issues = []
 		try:
 			if self.timesheet_detail:
-				td_issues=[td.issue for td in self.get('timesheet_detail')]
-				frappe.msgprint(_("td: {0}").format(td_issues))
-	
+				td_issues=[td.issue for td in self.get('timesheet_detail')]	
 				for issue in issues: #Load newest issues - not in the timesheet table yet
-					frappe.msgprint(_("issue: {0}").format(issue['name']))
-
 					if issue['name'] not in td_issues:
 						remaining_issues.append(issue)
 				self.add_timesheet_rows(remaining_issues)
@@ -57,42 +53,41 @@ class SimplifiedTimeReporting(Document):
 		from datetime import datetime
 
 		_now = now_datetime()
-		frappe.msgprint(_(str(_now)))
 		self.posting_date = datetime.strptime(str(_now).split('.')[:-1][0], '%Y-%m-%d %H:%M:%S')
-		frappe.msgprint(_(str(self.posting_date)))
 
 		self.total_reported_time = self.get_total_reported_time()
                 self.total_captured_time = self.get_total_captured_time()
 
-	def after_save(self):
-		import json, datetime
+	def on_submit(self):
+		import json
+		import datetime
+		from frappe.utils import now_datetime
 
-		if state == 'Approved' or state == 'To Approve':
+		if self.workflow_state == 'Approved' or self.workflow_state == 'To Approve':
 			_now = now_datetime()
 			expenses_list = []
 			data = json.loads(str(frappe.as_json(self.expenses))) #need to be as_json, otherwhise the json won't load because of the datetime attribute
 			for expense in data:
-				frappe.msgprint(_("{0}").format(frappe.as_json(expense)))
-				frappe.msgprint(_("{0}").format(expense['description']))
+				try:
+					description = expense["description"]
+				except:
+					description = ""
 				exp = {
 					'expense_date' : expense['date'],
 					'expense_type' : expense['reason'],
-					'description' : expense['description'] if expense['description'] else None,
+					'description' : description,
 					'claim_amount' : expense['claim_amount'],
 					'sanctioned_amount' : expense['claim_amount']
 				}
 				expenses_list.append(exp)
 
-	#		frappe.new_doc('Expense Claim').update({ 
-	 #               	"employee": self.employee,
-	#			"approval_status" : "Draft",
-	#			"posting_date" : datetime.datetime.now().date(),
-	#			"expenses" : expenses_list,
-	#			"company" : "Aptitude Technologies"
-	#		}).save()					
-
-#		frappe.throw("Submit")
-#		doc.save()
+			frappe.new_doc('Expense Claim').update({ 
+	                	"employee": self.employee,
+				"approval_status" : "Draft",
+				"posting_date" : datetime.datetime.now().date(),
+				"expenses" : expenses_list,
+				"company" : "Aptitude Technologies"
+			}).save()					
 
 	def get_total_reported_time(self):
 		import json
@@ -111,7 +106,6 @@ class SimplifiedTimeReporting(Document):
 		issues = self.load_closed_issues()		
 		
 		for issue in issues:
-			frappe.msgprint(_(issue))
 			end_time_obj = datetime.strptime(issue['captured_end_working_time'].split('.')[0], '%Y-%m-%d %H:%M:%S')
                         start_time_obj = datetime.strptime(issue['captured_start_working_time'].split('.')[0], '%Y-%m-%d %H:%M:%S')
                         diff_time = self.get_diff_time(start_time_obj, end_time_obj)

@@ -17,6 +17,17 @@ frappe.ui.form.on("Simplified Time Reporting", {
 		});
 	
     	},
+	on_submit: function(frm) {
+                frappe.call({
+                        method: "on_submit",
+                        doc: frm.doc,
+                        args: { },
+                        callback: function() {
+                        }
+                });
+
+        },
+
 });
 
 
