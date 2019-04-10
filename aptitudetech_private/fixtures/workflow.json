@@ -7,6 +7,9 @@
   "modified": "2019-03-16 13:06:53.731043", 
   "name": "Simplified Time Sheet Approval", 
   "override_status": 0, 
+  "parent": null, 
+  "parentfield": null, 
+  "parenttype": null, 
   "send_email_alert": 0, 
   "states": [
    {
@@ -14,6 +17,9 @@
     "doc_status": "0", 
     "message": null, 
     "next_action_email_template": null, 
+    "parent": "Simplified Time Sheet Approval", 
+    "parentfield": "states", 
+    "parenttype": "Workflow", 
     "state": "Draft", 
     "update_field": null, 
     "update_value": null
@@ -23,6 +29,9 @@
     "doc_status": "1", 
     "message": null, 
     "next_action_email_template": null, 
+    "parent": "Simplified Time Sheet Approval", 
+    "parentfield": "states", 
+    "parenttype": "Workflow", 
     "state": "Approved", 
     "update_field": null, 
     "update_value": null
@@ -32,6 +41,9 @@
     "doc_status": "1", 
     "message": null, 
     "next_action_email_template": null, 
+    "parent": "Simplified Time Sheet Approval", 
+    "parentfield": "states", 
+    "parenttype": "Workflow", 
     "state": "To Approve", 
     "update_field": null, 
     "update_value": null
@@ -41,6 +53,9 @@
     "doc_status": "1", 
     "message": null, 
     "next_action_email_template": null, 
+    "parent": "Simplified Time Sheet Approval", 
+    "parentfield": "states", 
+    "parenttype": "Workflow", 
     "state": "Rejected", 
     "update_field": null, 
     "update_value": null
@@ -53,6 +68,9 @@
     "allowed": "All", 
     "condition": "doc.total_captured_time >= doc.total_reported_time", 
     "next_state": "Approved", 
+    "parent": "Simplified Time Sheet Approval", 
+    "parentfield": "transitions", 
+    "parenttype": "Workflow", 
     "state": "Draft"
    }, 
    {
@@ -61,6 +79,9 @@
     "allowed": "All", 
     "condition": "doc.total_captured_time < doc.total_reported_time", 
     "next_state": "To Approve", 
+    "parent": "Simplified Time Sheet Approval", 
+    "parentfield": "transitions", 
+    "parenttype": "Workflow", 
     "state": "Draft"
    }, 
    {
@@ -69,6 +90,9 @@
     "allowed": "All", 
     "condition": "doc.total_captured_time < doc.total_reported_time", 
     "next_state": "Approved", 
+    "parent": "Simplified Time Sheet Approval", 
+    "parentfield": "transitions", 
+    "parenttype": "Workflow", 
     "state": "To Approve"
    }, 
    {
@@ -77,6 +101,9 @@
     "allowed": "All", 
     "condition": null, 
     "next_state": "Rejected", 
+    "parent": "Simplified Time Sheet Approval", 
+    "parentfield": "transitions", 
+    "parenttype": "Workflow", 
     "state": "To Approve"
    }
   ], 

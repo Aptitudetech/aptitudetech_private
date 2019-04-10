@@ -190,4 +190,15 @@ fixtures = [
     	}
 
 },
+{
+	'dt': 'Property Setter',
+	'filters': {
+		'name': ['in', [
+			'Issue-issue_type-bold'
+		]]
+	}
+},
+{
+	'dt': 'Issue Type'
+}
 ]
