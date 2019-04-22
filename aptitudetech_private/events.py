@@ -31,8 +31,11 @@ def on_issue_validate(doc, handler=None):
 	if doc.kanban_status != "Stopped" and actual_kbn_status == "Stopped":
 		doc.stopped_time = (doc.stopped_time or 0.0) + time_diff_in_hours(now_datetime(), doc.last_stopped_time)
 		doc.last_stopped_time = True
-	elif actual_kbn_status == "Completed":
+	if actual_kbn_status == "Completed":
 		doc.stopped_time = (doc.stopped_time or 0.0) + time_diff_in_hours(now_datetime(), doc.captured_end_working_time)
+	if actual_kbn_status == "Working" and doc.kanban_status != "Working":
+		doc.captured_working_time = (doc.captured_working_time or 0.0) + time_diff_in_hours(now_datetime(), doc.captured_start_working_time)
+		doc.reported_working_time = (doc.reported_working_time or 0.0) + time_diff_in_hours(now_datetime(), doc.reported_work_start_time)
 
 	if doc.kanban_status in ("To Be Assigned", "Completed") and actual_kbn_status != doc.kanban_status:
 		has_todo = frappe.db.exists('ToDo', {
@@ -48,34 +51,43 @@ def on_issue_validate(doc, handler=None):
 	if not doc.is_new() and doc.kanban_status == "Incoming" and actual_kbn_status != "Incoming":
 		frappe.throw(_("You cannot move back to 'Incoming' from '{0}'").format(actual_kbn_status))
 
-	elif doc.kanban_status in ("Assigned", "Working") and actual_kbn_status == "To Be Assigned":
+	if doc.kanban_status in ("Assigned", "Working"):
 		doc.captured_assigned_time = doc.modified
-		todo = frappe.new_doc('ToDo')
-		todo.update({
-			'owner': frappe.session.user,
-			'reference_type' : 'Issue',
-			'reference_name' : doc.name,
+		if not frappe.db.exists('ToDo', {
+			'reference_type': 'Issue',
+			'reference_name': doc.name,
 			'assigned_by': frappe.session.user,
-			'description': 'ToDo' 
-		})		
-		todo.flags.ignore_permissions = True
-		todo.save()
+			'owner': frappe.session.user,
+			'status': 'Open' }):
+			todo = frappe.new_doc('ToDo')
+			todo.update({
+				'owner': frappe.session.user,
+				'reference_type' : 'Issue',
+				'reference_name' : doc.name,
+				'assigned_by': frappe.session.user,
+				'description': 'ToDo' 
+			})		
+			todo.flags.ignore_permissions = True
+			todo.save()
 
-	elif doc.kanban_status == "Working":
+	if doc.kanban_status == "Working":
+		doc.captured_start_working_time = now
+		doc.reported_work_start_time = doc.captured_start_working_time
+
+	if doc.kanban_status == "Completed":
 		if not doc.captured_start_working_time:
 			doc.captured_start_working_time = now
 		if not doc.reported_work_start_time:
-			doc.reported_work_start_time = doc.captured_start_working_time
-
-	elif doc.kanban_status == "Completed":
-		if not doc.captured_start_working_time:
-			doc.captured_start_working_time = now
-		if not doc.reported_work_start_time:
-			doc.reported_working_time = now
+			doc.reported_work_start_time = now
                 doc.captured_end_working_time = now
 		doc.reported_work_end_time = now
+		doc.captured_working_time = (doc.captured_working_time or 0.0) + time_diff_in_hours(now, doc.captured_start_working_time)
+		doc.reported_working_time = (doc.reported_working_time or 0.0) + time_diff_in_hours(now, doc.reported_work_start_time)
+		doc.completed_by = frappe.session.user
 
-	elif doc.kanban_status == "Stopped" and actual_kbn_status != "Stopped":
-		if actual_kbn_status != "Working":
+	if doc.kanban_status == "Stopped" and actual_kbn_status != "Stopped":
+		if actual_kbn_status and actual_kbn_status != "Working":
 			frappe.throw(_("You cannot move to 'Stopped' from '{0}', only 'Working' is acceptable").format(actual_kbn_status))
 		doc.last_stopped_time = now
+
+	doc.billable_time = (doc.captured_working_time or 0.0) - (doc.stopped_time or 0.0)
