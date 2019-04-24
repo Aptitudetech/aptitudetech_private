@@ -13,7 +13,7 @@ def x_round(x):
 def on_issue_validate(doc, handler=None):
 	#ie new ticket
 	now = now_datetime()
-
+	doc.status = "Open"
 	if doc.raised_by:
 		if not doc.customer:
 			domain = doc.raised_by.split('@')[-1]
@@ -34,7 +34,7 @@ def on_issue_validate(doc, handler=None):
 
 	if doc.kanban_status != "Stopped" and actual_kbn_status == "Stopped":
 		doc.stopped_time = (doc.stopped_time or 0.0) + time_diff_in_hours(now_datetime(), doc.last_stopped_time)
-		doc.last_stopped_time = True
+		doc.last_stopped_time = now
 	if actual_kbn_status == "Completed":
 		doc.stopped_time = (doc.stopped_time or 0.0) + time_diff_in_hours(now_datetime(), doc.captured_end_working_time)
 	if actual_kbn_status == "Working" and doc.kanban_status != "Working":
@@ -56,6 +56,7 @@ def on_issue_validate(doc, handler=None):
 		frappe.throw(_("You cannot move back to 'Incoming' from '{0}'").format(actual_kbn_status))
 
 	if doc.kanban_status in ("Assigned", "Working"):
+		doc.status = "Replied"
 		doc.captured_assigned_time = doc.modified
 		if not frappe.db.exists('ToDo', {
 			'reference_type': 'Issue',
@@ -78,11 +79,12 @@ def on_issue_validate(doc, handler=None):
 		doc.captured_start_working_time = now
 		doc.reported_work_start_time = doc.captured_start_working_time
 
-	if doc.kanban_status == "Completed":
+	if doc.kanban_status == "Completed" and actual_kbn_status != "Completed":
 		if not doc.captured_start_working_time:
 			doc.captured_start_working_time = now
 		if not doc.reported_work_start_time:
 			doc.reported_work_start_time = now
+		doc.status = "Closed"
                 doc.captured_end_working_time = now
 		doc.reported_work_end_time = now
 		doc.captured_working_time = (doc.captured_working_time or 0.0) + time_diff_in_hours(now, doc.captured_start_working_time)
@@ -93,5 +95,6 @@ def on_issue_validate(doc, handler=None):
 		if actual_kbn_status and actual_kbn_status != "Working":
 			frappe.throw(_("You cannot move to 'Stopped' from '{0}', only 'Working' is acceptable").format(actual_kbn_status))
 		doc.last_stopped_time = now
+		doc.status = "Hold"
 
-	doc.billable_time = x_round((doc.captured_working_time or 0.0) - (doc.stopped_time or 0.0))
+	doc.billable_time = x_round((doc.reported_working_time or 0.0))
