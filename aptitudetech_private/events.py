@@ -3,8 +3,12 @@
 from __future__ import unicode_literals
 
 import frappe
+import math
 from frappe import _
 from frappe.utils import now_datetime, time_diff_in_hours
+
+def x_round(x):
+    return math.ceil(x * 4) / 4
 
 def on_issue_validate(doc, handler=None):
 	#ie new ticket
@@ -90,4 +94,4 @@ def on_issue_validate(doc, handler=None):
 			frappe.throw(_("You cannot move to 'Stopped' from '{0}', only 'Working' is acceptable").format(actual_kbn_status))
 		doc.last_stopped_time = now
 
-	doc.billable_time = (doc.captured_working_time or 0.0) - (doc.stopped_time or 0.0)
+	doc.billable_time = x_round((doc.captured_working_time or 0.0) - (doc.stopped_time or 0.0))
