@@ -71,8 +71,8 @@ def on_issue_validate(doc, handler=None):
 
 		elif doc.kanban_status == "Working":
 			# If there's an previous working/reported time, increse it
-			if doc.captured_start_working_time: doc.captured_working_time = (doc.captured_working_time  or 0.0) + time_diff_in_hours(now_datetime(), doc.captured_start_working_time)
-			if doc.reported_working_time: doc.reported_working_time = (doc.reported_working_time or 0.0) + time_diff_in_hours(now_datetime, doc.reported_work_start_time)
+			if doc.captured_start_working_time: doc.captured_working_time = (doc.captured_working_time  or 0.0) + time_diff_in_hours(now, doc.captured_start_working_time)
+			if doc.reported_working_time: doc.reported_working_time = (doc.reported_working_time or 0.0) + time_diff_in_hours(now, doc.reported_work_start_time)
 
 			# Reset working start times
 			doc.captured_start_working_time = now
@@ -101,8 +101,8 @@ def on_issue_validate(doc, handler=None):
 			doc.reported_work_end_time = now
 
 			# Update ticket times
-			doc.captured_working_time = (doc.captured_working_time  or 0.0) + time_diff_in_hours(now_datetime(), doc.captured_start_working_time)
-			doc.catured_reported_working_time = (doc.reported_working_time or 0.0) + time_diff_in_hours(now_datetime, doc.reported_work_start_time)
+			doc.captured_working_time = (doc.captured_working_time  or 0.0) + time_diff_in_hours(now, doc.captured_start_working_time)
+			doc.catured_reported_working_time = (doc.reported_working_time or 0.0) + time_diff_in_hours(now, doc.reported_work_start_time)
 
 			# Calculate the billable time
 			doc.billable_time = x_round((doc.reported_working_time or 0.01))
