@@ -46,7 +46,7 @@ def on_issue_validate(doc, handler=None):
 		if actual_kanban_status in ("Stopped", "Completed"):
 			# If there is an previous stopped time, increase it
 			if doc.last_stopped_time:
-				doc.stopped_time = (doc.stopped_time or 0.0) + time_diff_in_hours(doc.last_stopped_time, now)
+				doc.stopped_time = (doc.stopped_time or 0.0) + time_diff_in_hours(now, doc.last_stopped_time)
 
 			# Reset the last stopped time
 			doc.last_stopped_time = None
