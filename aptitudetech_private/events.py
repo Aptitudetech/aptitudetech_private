@@ -16,7 +16,7 @@ def on_issue_validate(doc, handler=None):
 	if doc.is_new():
 		# Ensure ticket status is Open
 		doc.status = "Open"
-		
+
 		# Set captured incoming time
 		doc.captured_incoming_time
 
@@ -41,6 +41,15 @@ def on_issue_validate(doc, handler=None):
 	if doc.kanban_status != actual_kanban_status:
 		# Ensure ticket status is Open
 		doc.status = "Open"
+
+		# Verify if movement come from Stopped or Completed
+		if actual_kanban_status in ("Stopped", "Completed"):
+			# If there is an previous stopped time, increase it
+			if doc.last_stopped_time:
+				doc.stopped_time = (doc.stopped_time or 0.0) + time_diff_in_hours(doc.last_stopped_time, now)
+
+			# Reset the last stopped time
+			doc.last_stopped_time = None
 
 		if doc.kanban_status == "Incoming":
 			# Nothing to do here (at least for now)
@@ -75,9 +84,6 @@ def on_issue_validate(doc, handler=None):
 				frappe.throw(_("You cannot move to '{0}' from {1}, only '{2}' is acceptable").format(
 					_(doc.kanban_status), _(actual_kanban_status), _("Working") 
 				))
-			
-			# Reset the stopped time counter
-			doc.last_stopped_time = now
 
 			# Update status and set on hold
 			doc.status = "Hold"
@@ -95,6 +101,9 @@ def on_issue_validate(doc, handler=None):
 			doc.captured_working_time = (doc.captured_working_time  or 0.0) + time_diff_in_hours(now_datetime(), doc.captured_start_working_time)
 			doc.catured_reported_working_time = (doc.reported_working_time or 0.0) + time_diff_in_hours(now_datetime, doc.reported_work_start_time)
 
+			# Start the counter on stopped time
+			doc.last_stopped_time = now
+
 			# Calculate the billable time
 			doc.billable_time = x_round((doc.reported_working_time or 0.01))
 
@@ -104,6 +113,10 @@ def on_issue_validate(doc, handler=None):
 			# Close the ticket
 			doc.status = "Closed"
 		
+			# Handle assignation close
+			do_assignation_close(doc)
+
+
 
 def do_assignation_open(doc):
 	"""Create an self assignated ToDo
