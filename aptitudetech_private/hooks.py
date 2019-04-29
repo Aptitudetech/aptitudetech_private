@@ -58,9 +58,9 @@ app_license = "MIT"
 # -----------
 # Permissions evaluated in scripted ways
 
-#permission_query_conditions = {
-# 	"Issue": "aptitudetech_private.permissions.get_issue_permissions_query_conditions",
-#}
+permission_query_conditions = {
+ 	"Issue": "aptitudetech_private.permissions.get_issue_permissions_query_conditions",
+}
 
 #has_permission = {
 #	"Issue": "aptitudetech_private.permissions.has_permission_to_issue",

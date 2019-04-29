@@ -37,9 +37,12 @@ def on_issue_validate(doc, handler=None):
 		doc.last_stopped_time = now
 	if actual_kbn_status == "Completed":
 		doc.stopped_time = (doc.stopped_time or 0.0) + time_diff_in_hours(now_datetime(), doc.captured_end_working_time)
+	
 	if actual_kbn_status == "Working" and doc.kanban_status != "Working":
 		doc.captured_working_time = (doc.captured_working_time or 0.0) + time_diff_in_hours(now_datetime(), doc.captured_start_working_time)
 		doc.reported_working_time = (doc.reported_working_time or 0.0) + time_diff_in_hours(now_datetime(), doc.reported_work_start_time)
+		doc.captured_start_working_time = now
+		doc.reported_work_start_time = now
 
 	if doc.kanban_status in ("To Be Assigned", "Completed") and actual_kbn_status != doc.kanban_status:
 		has_todo = frappe.db.exists('ToDo', {
@@ -74,10 +77,6 @@ def on_issue_validate(doc, handler=None):
 			})		
 			todo.flags.ignore_permissions = True
 			todo.save()
-
-	if doc.kanban_status == "Working":
-		doc.captured_start_working_time = now
-		doc.reported_work_start_time = doc.captured_start_working_time
 
 	if doc.kanban_status == "Completed" and actual_kbn_status != "Completed":
 		if not doc.captured_start_working_time:

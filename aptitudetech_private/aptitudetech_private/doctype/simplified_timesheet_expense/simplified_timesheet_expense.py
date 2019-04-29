@@ -4,7 +4,7 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe.model.document import Document
+from frappe.model.base_document import BaseDocument
 
-class SimplifiedTImesheetExpense(Document):
+class SimplifiedTimesheetExpense(BaseDocument):
 	pass

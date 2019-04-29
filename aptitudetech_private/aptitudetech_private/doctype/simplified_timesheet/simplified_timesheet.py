@@ -31,7 +31,7 @@ class SimplifiedTimesheet(Document):
 
 		rows = frappe.get_all('Issue', filters={
 			'billable': 1,
-			#'billable_time': ['>', 0.0],
+			'billable_time': ['>', 0.0],
 			'per_billed': ['<', 100],
 			'completed_by': self.user
 		}, order_by='captured_incoming_time')

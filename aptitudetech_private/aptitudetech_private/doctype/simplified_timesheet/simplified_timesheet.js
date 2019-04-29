@@ -5,7 +5,7 @@ frappe.ui.form.on('Simplified Timesheet', {
 	onload: function(frm){
 	},
 	refresh: function(frm) {
-		if (frm.doc.user && !frm.doc.employee) frappe.trigger('user');
+		if (frm.doc.user && !frm.doc.employee) frm.trigger('user');
 		if (!frm.doc.start_date) frm.set_value('start_date', frappe.datetime.month_start());
 		if (!frm.doc.end_date) frm.set_value('end_date', frappe.datetime.month_end());
 	},
