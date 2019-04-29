@@ -85,6 +85,9 @@ def on_issue_validate(doc, handler=None):
 					_(doc.kanban_status), _(actual_kanban_status), _("Working") 
 				))
 
+			# Start the counter on stopped time
+			doc.last_stopped_time = now
+
 			# Update status and set on hold
 			doc.status = "Hold"
 		
@@ -100,9 +103,6 @@ def on_issue_validate(doc, handler=None):
 			# Update ticket times
 			doc.captured_working_time = (doc.captured_working_time  or 0.0) + time_diff_in_hours(now_datetime(), doc.captured_start_working_time)
 			doc.catured_reported_working_time = (doc.reported_working_time or 0.0) + time_diff_in_hours(now_datetime, doc.reported_work_start_time)
-
-			# Start the counter on stopped time
-			doc.last_stopped_time = now
 
 			# Calculate the billable time
 			doc.billable_time = x_round((doc.reported_working_time or 0.01))
