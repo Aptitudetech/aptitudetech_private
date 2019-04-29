@@ -16,7 +16,7 @@ def on_issue_validate(doc, handler=None):
 	if doc.is_new():
 		# Ensure ticket status is Open
 		doc.status = "Open"
-
+		
 		# Set captured incoming time
 		doc.captured_incoming_time
 
@@ -57,13 +57,13 @@ def on_issue_validate(doc, handler=None):
 			# Set captured assignation time
 			doc.captured_assigned_time = now
 
-			# Handle creete assignation
+			# Handle create assignation
 			do_assignation_open(doc)
 
 		elif doc.kanban_status == "Working":
 			# If there's an previous working/reported time, increse it
-			doc.captured_working_time = (doc.captured_working_time  or 0.0) + time_diff_in_hours(now_datetime(), doc.captured_start_working_time)
-			doc.cpatured_reported_working_time = (doc.reported_working_time or 0.0) + time_diff_in_hours(now_datetime, doc.reported_work_start_time)
+			if doc.captured_start_working_time: doc.captured_working_time = (doc.captured_working_time  or 0.0) + time_diff_in_hours(now_datetime(), doc.captured_start_working_time)
+			if doc.captured_reported_working_time: doc.captured_reported_working_time = (doc.reported_working_time or 0.0) + time_diff_in_hours(now_datetime, doc.reported_work_start_time)
 
 			# Reset working start times
 			doc.captured_start_working_time = now
