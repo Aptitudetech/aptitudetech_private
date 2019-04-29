@@ -24,7 +24,7 @@ def on_issue_validate(doc, handler=None):
 			# Extract domain from email and fetch customer and contact
 			domain = doc.raised_by.split('@')[-1] 
 			customer = frappe.db.exists('Customer', {'website': ['like', '%{}'.format(domain)]})
-			contact = frappe.db.exists('Contact', {'email_id': doc.raiseD_by})
+			contact = frappe.db.exists('Contact', {'email_id': doc.raised_by})
 			
 			# Associate customer if match
 			if customer and not doc.customer:
@@ -51,9 +51,9 @@ def on_issue_validate(doc, handler=None):
 			# Reset the last stopped time
 			doc.last_stopped_time = None
 
-		if doc.kanban_status == "Incoming":
-			# Nothing to do here (at least for now)
-			pass
+		if actual_kanban_status and doc.kanban_status == "Incoming":
+			# Only throws a validation
+			frappe.msgprint(_("You can't move one ticket back to 'Incoming' state."))
 
 		elif doc.kanban_status == 'To Be Assigned':
 			# Handle assignation close if exists
