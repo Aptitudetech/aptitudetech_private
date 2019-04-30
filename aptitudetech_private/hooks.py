@@ -92,18 +92,10 @@ scheduler_events = {
 # 		"aptitudetech_private.tasks.all"
 # 	],
 #	"cron": {
- 	"18 * * * *": [
- 		"aptitudetech_private.tasks.daily"
-	]
 #	}
-#	"cron": {
-#	 	"18 * * * *": [
-#	 		"aptitudetech_private.tasks.daily"
- #		]
-#	}
-# 	"daily": [
-# 		"aptitudetech_private.tasks.daily"
-# 	],
+	"daily": [
+ 		"aptitudetech_private.tasks.download_aws"
+ 	],
 # 	"hourly": [
 # 		"aptitudetech_private.tasks.hourly"
 # 	],

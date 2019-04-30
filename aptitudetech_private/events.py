@@ -66,43 +66,74 @@ def on_issue_validate(doc, handler=None):
 			# Set captured assignation time
 			doc.captured_assigned_time = now
 
-			# Handle create assignation
+			# Handle create assignation if not exists
 			do_assignation_open(doc)
 
 		elif doc.kanban_status == "Working":
 			# If there's an previous working/reported time, increse it
-			if doc.captured_start_working_time: doc.captured_working_time = (doc.captured_working_time  or 0.0) + time_diff_in_hours(now, doc.captured_start_working_time)
-			if doc.reported_working_time: doc.reported_working_time = (doc.reported_working_time or 0.0) + time_diff_in_hours(now, doc.reported_work_start_time)
+			doc.captured_working_time = (doc.captured_working_time  or 0.0) \
+				+ time_diff_in_hours(now, doc.captured_start_working_time)
+			
+			doc.reported_working_time = (doc.reported_working_time or 0.0) \
+				+ time_diff_in_hours(now, doc.reported_work_start_time)
+
+			# Calculate the billable time
+			doc.billable_time = x_round((doc.reported_working_time or 0.01))
 
 			# Reset working start times
 			doc.captured_start_working_time = now
 			doc.reported_work_start_time = now
+
+			# Handle create assignation if not exists
+			do_assignation_open(doc)
 		
 		elif doc.kanban_status == 'Stopped':
+			# If there's an previous working/reported time, increse it
+			doc.captured_working_time = (doc.captured_working_time  or 0.0) \
+				+ time_diff_in_hours(now, doc.captured_start_working_time)
+			
+			doc.reported_working_time = (doc.reported_working_time or 0.0) \
+				+ time_diff_in_hours(now, doc.reported_work_start_time)
+
+			# Update the end times
+			doc.captured_end_working_time = now
+			doc.reported_work_end_time = now
+
+			# Calculate the billable time
+			doc.billable_time = x_round((doc.reported_working_time or 0.01))
+
 			# Validation, to check if the update dont came from "Working" or `None` status
 			if actual_kanban_status and actual_kanban_status != "Working":
 				frappe.throw(_("You cannot move to '{0}' from {1}, only '{2}' is acceptable").format(
-					_(doc.kanban_status), _(actual_kanban_status), _("Working") 
-				))
+					_(doc.kanban_status), _(actual_kanban_status), _("Working")))
 
 			# Start the counter on stopped time
 			doc.last_stopped_time = now
 
 			# Update status and set on hold
 			doc.status = "Hold"
+
+			# Handle create assignation if not exists
+			do_assignation_open(doc)
 		
 		elif doc.kanban_status == "Completed":
 			# Verify if the times arent captured yet
-			if not doc.captured_start_working_time: doc.captured_start_working_time = now
-			if not doc.reported_work_start_time: doc.reported_work_start_time = now
+			if not doc.captured_start_working_time: 
+				doc.captured_start_working_time = now
+			
+			if not doc.reported_work_start_time: 
+				doc.reported_work_start_time = now
 			
 			# Update the end times
 			doc.captured_end_working_time = now
 			doc.reported_work_end_time = now
 
 			# Update ticket times
-			doc.captured_working_time = (doc.captured_working_time  or 0.0) + time_diff_in_hours(now, doc.captured_start_working_time)
-			doc.catured_reported_working_time = (doc.reported_working_time or 0.0) + time_diff_in_hours(now, doc.reported_work_start_time)
+			doc.captured_working_time = (doc.captured_working_time  or 0.0) \
+				+ time_diff_in_hours(now, doc.captured_start_working_time)
+			
+			doc.catured_reported_working_time = (doc.reported_working_time or 0.0) \
+				+ time_diff_in_hours(now, doc.reported_work_start_time)
 
 			# Calculate the billable time
 			doc.billable_time = x_round((doc.reported_working_time or 0.01))
@@ -114,7 +145,7 @@ def on_issue_validate(doc, handler=None):
 			doc.status = "Closed"
 		
 			# Handle assignation close
-			do_assignation_close(doc)
+			do_all_assignation_close(doc)
 
 
 
@@ -143,6 +174,16 @@ def do_assignation_close(doc):
 	todo = has_self_assignation(doc)
 	if todo:
 		frappe.db.set_value('ToDo', todo, 'status', 'Close')
+
+
+def do_all_assignation_close(doc):
+	"""Close all existing todos related to that doc
+	"""
+	for todo in frappe.get_all('ToDo', filters={
+		'reference_doctype': doc.doctype,
+		'reference_name': doc.name,
+		'status': 'Open'}):
+		frappe.db.set_value('ToDo', todo, 'status', 'Closed')
 
 
 def has_self_assignation(doc, status='Open'):
