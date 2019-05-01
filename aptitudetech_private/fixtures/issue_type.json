@@ -3,6 +3,61 @@
   "description": null, 
   "docstatus": 0, 
   "doctype": "Issue Type", 
+  "modified": "2019-04-24 16:20:26.473790", 
+  "name": "Analysis", 
+  "parent": null, 
+  "parentfield": null, 
+  "parenttype": null, 
+  "ticket_type": "Development"
+ }, 
+ {
+  "description": null, 
+  "docstatus": 0, 
+  "doctype": "Issue Type", 
+  "modified": "2019-04-25 09:10:10.809940", 
+  "name": "Research and Development", 
+  "parent": null, 
+  "parentfield": null, 
+  "parenttype": null, 
+  "ticket_type": "Aptitude"
+ }, 
+ {
+  "description": null, 
+  "docstatus": 0, 
+  "doctype": "Issue Type", 
+  "modified": "2019-04-25 09:10:45.258855", 
+  "name": "Internal Project", 
+  "parent": null, 
+  "parentfield": null, 
+  "parenttype": null, 
+  "ticket_type": "Aptitude"
+ }, 
+ {
+  "description": null, 
+  "docstatus": 0, 
+  "doctype": "Issue Type", 
+  "modified": "2019-04-25 09:12:53.760950", 
+  "name": "ERPNext Server", 
+  "parent": null, 
+  "parentfield": null, 
+  "parenttype": null, 
+  "ticket_type": "Issue"
+ }, 
+ {
+  "description": null, 
+  "docstatus": 0, 
+  "doctype": "Issue Type", 
+  "modified": "2019-04-25 09:17:41.531301", 
+  "name": "ERPNext - Shared Server Instance Maintenance", 
+  "parent": null, 
+  "parentfield": null, 
+  "parenttype": null, 
+  "ticket_type": "Issue"
+ }, 
+ {
+  "description": null, 
+  "docstatus": 0, 
+  "doctype": "Issue Type", 
   "modified": "2019-04-10 11:51:09.584282", 
   "name": "ERPNext Module", 
   "parent": null, 
@@ -124,22 +179,33 @@
   "description": null, 
   "docstatus": 0, 
   "doctype": "Issue Type", 
-  "modified": "2019-04-10 12:01:04.270568", 
+  "modified": "2019-05-01 11:48:12.843025", 
   "name": "Development", 
   "parent": null, 
   "parentfield": null, 
   "parenttype": null, 
-  "ticket_type": "Outsourcing"
+  "ticket_type": "Task"
  }, 
  {
   "description": null, 
   "docstatus": 0, 
   "doctype": "Issue Type", 
-  "modified": "2019-04-10 12:01:16.849529", 
+  "modified": "2019-05-01 11:47:58.840298", 
   "name": "IT Management", 
   "parent": null, 
   "parentfield": null, 
   "parenttype": null, 
-  "ticket_type": "Outsourcing"
+  "ticket_type": "Task"
+ }, 
+ {
+  "description": null, 
+  "docstatus": 0, 
+  "doctype": "Issue Type", 
+  "modified": "2019-05-01 11:49:03.796464", 
+  "name": "Travel Time", 
+  "parent": null, 
+  "parentfield": null, 
+  "parenttype": null, 
+  "ticket_type": "Aptitude"
  }
 ]

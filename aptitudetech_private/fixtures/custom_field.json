@@ -26,7 +26,7 @@
   "modified": "2019-01-15 16:59:33.133843", 
   "name": "Issue-ticket_type", 
   "no_copy": 0, 
-  "options": "\nDevelopment\nIssue\nTask", 
+  "options": "\nDevelopment\nIssue\nTask\nAptitude", 
   "parent": null, 
   "parentfield": null, 
   "parenttype": null, 
