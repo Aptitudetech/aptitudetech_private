@@ -121,38 +121,6 @@ scheduler_events = {
 
 fixtures = [
 {
-	"dt": "Custom Field",
-	"filters": {
-        	"name": ["in", [
-			"Timesheet Detail-issue",
-        	        "Project Task-end_time",
-             		"Project Task-start_time",
-             		"Issue-column_break_28",
-             		"Issue-kanban_status",
-             		"Issue-approved_work_end_time",
-             		"Issue-approved_work_start_time",
-             		"Issue-reported_work_end_time",
-             		"Issue-reported_work_start_time",
-             		"Issue-captured_end_working_time",
-             		"Issue-captured_start_working_time",
-             		"Issue-captured_assigned_time",
-             		"Issue-captured_incoming_time",
-             		"Issue-captured_times",
-             		"Issue-active_tickets",
-             		"Issue-other_links",
-             		"Issue-other_references",
-             		"Issue-services_html",
-             		"Issue-to_do",
-             		"Issue-tickets_links",
-             		"Issue-tickets_html",
-             		"Task-issue_id",
-             		"Issue-related_project",
-             		"Issue-tasks",
-             		"Issue-ticket_type",
-         	]]
-    	}
-},
-{
 	'dt': 'Workflow State',
     	"filters": {
         	"name": ["in", [

@@ -79,7 +79,7 @@ class SimplifiedTimesheet(Document):
 			self._set_times('total_stopped_time', None, flt(d.stopped_time), False)
 
 	def update_expense_totals(self):
-		for d in self.expenses:
+		for d in self.get('expenses'):
 			self._set_expenses('total_expenses_amount', flt(d.expense_amount))
 			self._set_expenses('total_taxes_included_in_expenses', flt(d.taxes_amount))
 			self._set_expenses('total_claimed_amount', flt(d.claimed_amount))
