@@ -186,7 +186,7 @@ def do_all_assignation_close(doc):
 	"""Close all existing todos related to that doc
 	"""
 	for todo in frappe.get_all('ToDo', filters={
-		'reference_doctype': doc.doctype,
+		'reference_type': doc.doctype,
 		'reference_name': doc.name,
 		'status': 'Open'}):
 		frappe.db.set_value('ToDo', todo, 'status', 'Closed')
