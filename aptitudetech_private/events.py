@@ -138,7 +138,7 @@ def on_issue_validate(doc, handler=None):
 			doc.captured_working_time = (doc.captured_working_time  or 0.0) \
 				+ time_diff_in_hours(now, doc.captured_start_working_time)
 			
-			doc.catured_reported_working_time = (doc.reported_working_time or 0.0) \
+			doc.reported_working_time = (doc.reported_working_time or 0.0) \
 				+ time_diff_in_hours(now, doc.reported_work_start_time)
 
 			# Calculate the billable time
