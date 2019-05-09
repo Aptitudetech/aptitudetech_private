@@ -153,6 +153,10 @@ def on_issue_validate(doc, handler=None):
 			# Handle assignation close
 			do_all_assignation_close(doc)
 
+	else:
+		# Calculate the billable time
+		doc.billable_time = x_round((doc.reported_working_time or 0.01))
+
 
 
 def do_assignation_open(doc):
