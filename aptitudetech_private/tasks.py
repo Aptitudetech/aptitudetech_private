@@ -155,7 +155,7 @@ def download_aws():
                         }
 			usage_data = {
 				'consumed_units': row.consumed_units,
-				'cost_per_unit': row.cost_per_unit * flt(settings.exchange_rate)
+				'cost_per_unit': (row.cost_per_unit or 0.0) * flt(settings.exchange_rate)
 			}
 			mful = frappe.db.exists('Metered Feature Units Log', mful_data)
 			if mful:
