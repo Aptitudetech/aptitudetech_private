@@ -89,11 +89,13 @@ def on_issue_validate(doc, handler=None):
 
 		elif doc.kanban_status == "Working":
 			# If there's an previous working/reported time, increse it
-			doc.captured_working_time = (doc.captured_working_time  or 0.0) \
-				+ time_diff_in_hours(now, doc.captured_start_working_time)
+			if doc.captured_start_working_time:
+				doc.captured_working_time = (doc.captured_working_time  or 0.0) \
+					+ time_diff_in_hours(now, doc.captured_start_working_time)
 			
-			doc.reported_working_time = (doc.reported_working_time or 0.0) \
-				+ time_diff_in_hours(now, doc.reported_work_start_time)
+			if doc.reported_work_start_time:
+				doc.reported_working_time = (doc.reported_working_time or 0.0) \
+					+ time_diff_in_hours(now, doc.reported_work_start_time)
 
 			# Calculate the billable time
 			doc.billable_time = x_round((doc.reported_working_time or 0.01))
@@ -107,15 +109,19 @@ def on_issue_validate(doc, handler=None):
 		
 		elif doc.kanban_status == 'Stopped':
 			# If there's an previous working/reported time, increse it
-			doc.captured_working_time = (doc.captured_working_time  or 0.0) \
-				+ time_diff_in_hours(now, doc.captured_start_working_time)
+			if doc.captured_start_working_time:
+				doc.captured_working_time = (doc.captured_working_time  or 0.0) \
+					+ time_diff_in_hours(now, doc.captured_start_working_time)
 			
-			doc.reported_working_time = (doc.reported_working_time or 0.0) \
-				+ time_diff_in_hours(now, doc.reported_work_start_time)
+			if doc.reported_work_start_time:	
+				doc.reported_working_time = (doc.reported_working_time or 0.0) \
+					+ time_diff_in_hours(now, doc.reported_work_start_time)
 
-			# Update the end times
-			doc.captured_end_working_time = now
-			doc.reported_work_end_time = now
+			# Reset start and end times
+			doc.captured_start_working_time = None
+			doc.captured_end_working_time = None
+			doc.reported_work_end_time = None
+			doc.reported_work_end_time = None
 
 			# Calculate the billable time
 			doc.billable_time = x_round((doc.reported_working_time or 0.01))
@@ -150,7 +156,7 @@ def on_issue_validate(doc, handler=None):
 			doc.captured_working_time = (doc.captured_working_time  or 0.0) \
 				+ time_diff_in_hours(now, doc.captured_start_working_time)
 			
-			doc.catured_reported_working_time = (doc.reported_working_time or 0.0) \
+			doc.reported_working_time = (doc.reported_working_time or 0.0) \
 				+ time_diff_in_hours(now, doc.reported_work_start_time)
 
 			# Calculate the billable time
@@ -164,6 +170,10 @@ def on_issue_validate(doc, handler=None):
 		
 			# Handle assignation close
 			do_all_assignation_close(doc)
+
+	else:
+		# Calculate the billable time
+		doc.billable_time = x_round((doc.reported_working_time or 0.01))
 
 
 
