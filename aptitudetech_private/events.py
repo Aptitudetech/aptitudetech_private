@@ -212,3 +212,43 @@ def x_round(x):
 	"""Round up time in 15 minutes
 	"""
 	return math.ceil(x * 4) / 4
+
+def on_project_onload(doc, handler=None):
+        """Order task by task_order
+        """
+
+	fields = ["title", "status", "start_date", "end_date", "description", "task_weight", "task_id"]
+	exclude_fieldtype = ["Button", "Column Break",
+		"Section Break", "Table", "Read Only", "Attach", "Attach Image", "Color", "Geolocation", "HTML", "Image"]
+
+	custom_fields = frappe.get_all("Custom Field", {"dt": "Project Task",
+		 "fieldtype": ("not in", exclude_fieldtype)}, "fieldname")
+
+	for d in custom_fields:
+		fields.append(d.fieldname)
+
+        if doc.get('name'):
+                doc.tasks = []
+                i = 1
+                for task in frappe.get_all('Task', '*', {'project': doc.name}, order_by='`task_order` asc'):
+                        task_map = {
+                                "title": task.subject,
+                                "status": task.status,
+                                "start_date": task.exp_start_date,
+                                "end_date": task.exp_end_date,
+                                "task_id": task.name,
+                                "description": task.descrition,
+                                "task_weight": task.task_weight,
+                                "idx": task.task_order or i
+                        }
+                        i += 1
+                        doc.map_custom_fields(task, task_map, custom_fields)
+
+                        doc.append("tasks", task_map)
+
+
+
+def on_project_validate(doc, handler=None):
+	for i, task in enumerate(doc.tasks, 1):
+		task.task_order = i
+

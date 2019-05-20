@@ -76,7 +76,12 @@ doc_events = {
 #	}
 	"Issue": {
 		"validate" : "aptitudetech_private.events.on_issue_validate"
-	}
+	},
+        "Project": {
+                "onload": "aptitudetech_private.events.on_project_onload",
+		"validate": "aptitudetech_private.events.on_project_validate"
+        },
+
 # 	"*": {
 # 		"on_update": "method",
 # 		"on_cancel": "method",
