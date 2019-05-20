@@ -35,10 +35,28 @@ def on_issue_validate(doc, handler=None):
 				doc.contact = contact
 	else:
 		# Pull actual kanban status from database
-		actual_kanban_status = doc.db_get('kanban_status')
+		actual_kanban_status = frappe.db.get_value(doc.doctype, doc.name, 'kanban_status')
+
+	# Log Ticket Work Beat
+	active_work_beat = frappe.db.exists("Ticket Work Beat", {
+		"issue", doc.name, 
+		"user": frappe.session.user, 
+		"status": actual_kanban_status,
+		"end_time": None})
+	if actual_kanban_status and active_work_beat:
+		frappe.db.set_value("Ticket Work Beat", active_work_beat, "end_time", now)
+	else:
+		frappe.new_doc("Ticket Work Beat").update({
+			'issue': doc.name,
+			'user': frappe.session.user,
+			'status': doc.kanban_status,
+			'start_time': now
+		}).insert()
+
 
 	# Verify if the kanban status have changed
 	if doc.kanban_status != actual_kanban_status:
+
 		# Ensure ticket status is Open
 		doc.status = "Open"
 
