@@ -192,8 +192,8 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2019-05-20 17:23:23.696126", 
- "modified_by": "Administrator", 
+ "modified": "2019-05-22 09:06:07.117933", 
+ "modified_by": "mmorais@aptitudetech.net", 
  "module": "Aptitudetech Private", 
  "name": "Ticket Work Beat", 
  "name_case": "", 
@@ -221,7 +221,7 @@
   {
    "amend": 0, 
    "cancel": 0, 
-   "create": 0, 
+   "create": 1, 
    "delete": 0, 
    "email": 1, 
    "export": 1, 
@@ -239,7 +239,7 @@
   }
  ], 
  "quick_entry": 1, 
- "read_only": 1, 
+ "read_only": 0, 
  "read_only_onload": 0, 
  "show_name_in_global_search": 0, 
  "sort_field": "modified", 

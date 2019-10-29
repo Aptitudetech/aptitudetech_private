@@ -6,6 +6,19 @@ import frappe
 import math
 from frappe import _
 from frappe.utils import now_datetime, time_diff_in_hours
+from frappe.utils.user import get_system_managers
+
+def on_issue_after_insert(doc, handler=None):
+	beat = frappe.new_doc("Ticket Work Beat")
+	beat.update({
+		'issue': doc.name,
+		'user': frappe.session.user,
+		'status': doc.kanban_status,
+		'start_time': now_datetime()
+	})
+	beat.flags.ignore_permissions = True
+	beat.insert()
+
 
 def on_issue_validate(doc, handler=None):
 	"""Handle issue kanban transitions and compute work times
@@ -37,21 +50,29 @@ def on_issue_validate(doc, handler=None):
 		# Pull actual kanban status from database
 		actual_kanban_status = frappe.db.get_value(doc.doctype, doc.name, 'kanban_status')
 
-	# Log Ticket Work Beat
-	active_work_beat = frappe.db.exists("Ticket Work Beat", {
-		"issue", doc.name, 
-		"user": frappe.session.user, 
-		"status": actual_kanban_status,
-		"end_time": None})
-	if actual_kanban_status and active_work_beat:
-		frappe.db.set_value("Ticket Work Beat", active_work_beat, "end_time", now)
-	else:
-		frappe.new_doc("Ticket Work Beat").update({
-			'issue': doc.name,
-			'user': frappe.session.user,
-			'status': doc.kanban_status,
-			'start_time': now
-		}).insert()
+		# Log Ticket Work Beat
+		active_work_beat = frappe.db.sql("""
+			SELECT name
+			FROM `tabTicket Work Beat`
+			WHERE
+				issue = %s
+				AND status = %s
+				AND ifnull(end_time, "") = ""
+			ORDER BY start_time DESC
+			LIMIT 1
+			""", (doc.name, actual_kanban_status))
+		if active_work_beat:
+			frappe.db.set_value("Ticket Work Beat", active_work_beat[0][0], "end_time", now)
+		else:
+			beat = frappe.new_doc("Ticket Work Beat")
+			beat.update({
+				'issue': doc.name,
+				'user': frappe.session.user,
+				'status': doc.kanban_status,
+				'start_time': now
+			})
+			beat.flags.ignore_permissions = True
+			beat.insert()
 
 
 	# Verify if the kanban status have changed
@@ -175,6 +196,11 @@ def on_issue_validate(doc, handler=None):
 		# Calculate the billable time
 		doc.billable_time = x_round((doc.reported_working_time or 0.01))
 
+
+def on_issue_trash(doc, handler=None):
+	if frappe.session.user in get_system_managers(True):
+		for wb in frappe.get_all('Ticket Work Beat', filters={'issue': doc.name}):
+			frappe.delete_doc('Ticket Work Beat', wb.name)
 
 
 def do_assignation_open(doc):
