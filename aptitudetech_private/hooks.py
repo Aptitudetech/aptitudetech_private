@@ -81,7 +81,7 @@ doc_events = {
 	},
         "Project": {
                 "onload": "aptitudetech_private.events.on_project_onload",
-		"validate": "aptitudetech_private.events.on_project_validate"
+		# "validate": "aptitudetech_private.events.on_project_validate"
         },
 
 # 	"*": {

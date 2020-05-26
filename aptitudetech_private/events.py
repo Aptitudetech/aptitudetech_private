@@ -7,6 +7,7 @@ import math
 from frappe import _
 from frappe.utils import now_datetime, time_diff_in_hours
 from frappe.utils.user import get_system_managers
+from frappe.utils import get_datetime
 
 
 def on_issue_after_insert(doc, handler=None):
@@ -26,6 +27,8 @@ def on_issue_validate(doc, handler=None):
     """
     now = now_datetime()
     actual_kanban_status = None
+    completed = False
+
     if doc.kanban_status == 'Working':
         for stop in doc.on_hold_reason:
             if not stop.restart_time:
@@ -194,6 +197,7 @@ def on_issue_validate(doc, handler=None):
 
             # Close the ticket
             doc.status = "Closed"
+            completed = True
 
             # Handle assignation close
             do_all_assignation_close(doc)
@@ -202,72 +206,96 @@ def on_issue_validate(doc, handler=None):
     # 	# Calculate the billable time
     # 	doc.billable_time = x_round((doc.reported_working_time or 0.01))
 
-    ##TODO to fixx
-    # from frappe.utils import get_datetime
-    # completed = False
-    # if doc.kanban_status == 'Completed':
-    #     completed = True
-    # task = frappe.db.get_values('Task', {'issue': doc.name}, ['name', 'project'])
-    # for wl in doc.work_log:
-    #     work_start_time = get_datetime(wl.work_start_time)
-    #     work_end_time = get_datetime(wl.work_end_time)
-    #     diff_days = work_end_time - work_start_time
-    #
-    #     if diff_days.days >= 1:
-    #         frappe.throw(_("Please divide the Work Log per day. Problematic Work Log: {0}").format(work_start_time))
-    #     if work_end_time < work_start_time:
-    #         frappe.throw("Start Time can't be greater than End Time in the Work Log")
-    #     ts = frappe.db.get_value('Timesheet',
-    #                                  {'start_date': ('between', (work_start_time.replace(day=1).date(), work_start_time.date()))}, 'name')
-    #     if not ts:
-    #         employee = frappe.db.get_values('Employee', {'user_id': frappe.session.user}, '*', as_dict=True)
-    #         ts = frappe.new_doc('Timesheet')
-    #         ts.company = 'Aptitude Technologies'
-    #         ts.employee = employee.name
-    #         # ts.employee_name = employee.employee_name
-    #         # ts.start_date = wl.start_time.date()
-    #
-    #         ts.append('time_logs', {
-    #             'issue': doc.name,
-    #             # 'activity_type': '',
-    #             'from_time': work_start_time.date(),
-    #             'hours': (work_end_time - work_start_time).seconds // 3600,  # have the nb of hours
-    #             'to_time': work_end_time.date(),
-    #             'completed': completed,
-    #             'note': wl.work_description,
-    #             'project': task.project,
-    #             'task': task.name,
-    #             'billable': doc.billable,
-    #         })
-    #     else:
-    #         found = False
-    #         ts = frappe.get_doc('Timesheet', ts)
-    #         ts_details = frappe.db.get_all('Timesheet Detail', {'parent': ts.name, 'parenttype': 'Timesheet'}, '*')
-    #         for detail in ts_details:
-    #             if work_start_time == detail.start_time:
-    #                 if work_end_time != detail.end_time:
-    #                     detail.end_time = wl.work_end_time
-    #                 if wl.work_description != detail.note:
-    #                     detail.note = wl.work_description
-    #                 found = True
-    #                 break
-    #         if not found:
-    #             ts.append('time_logs', {
-    #                 'issue': doc.name,
-    #             # 'activity_type': '',
-    #                 'from_time': work_start_time.date(),
-    #                 'hours': (work_end_time - work_start_time).seconds // 3600,  # have the nb of hours
-    #                 'to_time': work_end_time.date(),
-    #                 'completed': completed,
-    #                 'note': wl.work_description,
-    #                 'project': task.project,
-    #                 'task': task.name,
-    #                 'billable': doc.billable,
-    #             })
+    if frappe.db.exists('Task', {'issue': doc.name}):
+        task = frappe.get_doc('Task', {'issue': doc.name})
+        if doc.status == 'Working':
+            task.status = 'Working'
+            if len(doc.work_log) > 0:
+                task.act_start_date = get_datetime(doc.work_log[0]['work_start_time']).date()  # date
+        elif doc.status == 'Incoming':
+            task.status = 'Open'
+        elif doc.status == 'Completed':
+            task.status = 'Completed'
+            task.act_end_date = get_datetime(doc.work_log[-1]['work_end_time']).date()  # date
+            task.actual_time = (get_datetime(doc.work_log[-1]['work_end_time']) - get_datetime(doc.work_log[-1]['work_start_time'])).seconds // 3600
+        if task.priority != doc.priority:
+            task.priority = doc.priority
 
+    else:
+        project = frappe.db.get_value('Project', {'customer':doc.customer, 'default_activity_type':doc.activity_type}, 'name')
+        task = frappe.new_doc('Task')
+        task.project = project
+        task.issue = doc.name
+        task.subject = doc.subject
+        task.status = 'Open'
+        task.priority = doc.priority
+        task.description = doc.description
+        task.flags.ignore_permissions = True
+        task.save()
 
-# create timesheet
-# timesheet = frappe.new_doc('Timesheet')
+    for wl in doc.work_log:
+        work_start_time = get_datetime(wl.work_start_time)
+        work_end_time = get_datetime(wl.work_end_time)
+        diff_days = work_end_time - work_start_time
+
+        if diff_days.days >= 1:
+            frappe.throw(_("Please divide the Work Log per day. Problematic Work Log: {0}").format(work_start_time))
+        if work_end_time < work_start_time:
+            frappe.throw("Start Time can't be greater than End Time in the Work Log")
+        #get timesheet for current month
+        ts = frappe.db.get_all('Timesheet',
+                                     {'start_date': ('between', (work_start_time.replace(day=1).date(), work_start_time.date()))}, 'name')
+        if not ts:
+            employee = frappe.db.get_value('Employee', {'user_id': frappe.session.user}, '*', as_dict=True)
+            ts = frappe.new_doc('Timesheet')
+            ts.company = 'Aptitude Technologies'
+            ts.employee = employee['name']
+            ts.append('time_logs', {
+                'issue': doc.name,
+                'activity_type': doc.activity_type,
+                'from_time': work_start_time.date(),
+                'hours': (work_end_time - work_start_time).seconds // 3600,  # have the nb of hours
+                'to_time': work_end_time.date(),
+                'completed': completed,
+                'note': wl.work_description,
+                'project': task.project,
+                'task': task.name,
+                'billable': doc.billable,
+            })
+            ts.flags.ignore_permissions = True
+            ts.save()
+        else:
+            ## TODO fix: it add each row to the timesheet
+            ## TODO handle the work log modification (ex: change in description or time)
+            ## Put the work log time fields as 'Set only once'? delete will delete row in timesheet as well
+            ## It created 2 timesheet - need to check why
+            found = False
+            ts = frappe.get_doc('Timesheet', ts[0]['name'])
+            ts_details = frappe.db.get_all('Timesheet Detail', {'parent': ts.name, 'parenttype': 'Timesheet'}, '*')
+            for detail in ts_details:
+                if work_start_time == detail.start_time:
+                    if work_end_time != detail.end_time:
+                        detail.end_time = wl.work_end_time
+                    if wl.work_description != detail.note:
+                        detail.note = wl.work_description
+                    found = True
+                    break
+            if not found:
+                ts.append('time_logs', {
+                    'issue': doc.name,
+                    'activity_type': doc.activity_type,
+                    'from_time': work_start_time.date(),
+                    'hours': (work_end_time - work_start_time).seconds // 3600,  # have the nb of hours
+                    'to_time': work_end_time.date(),
+                    'completed': completed,
+                    'note': wl.work_description,
+                    'project': task.project,
+                    'task': task.name,
+                    'billable': doc.billable,
+                })
+                ts.flags.ignore_permissions = True
+                ts.save()
+
 
 
 def on_issue_trash(doc, handler=None):
@@ -367,6 +395,6 @@ def on_project_onload(doc, handler=None):
             doc.append("tasks", task_map)
 
 
-def on_project_validate(doc, handler=None):
-    for i, task in enumerate(doc.tasks, 1):
-        task.task_order = i
+# def on_project_validate(doc, handler=None):
+#     for i, task in enumerate(doc.tasks, 1):
+#         task.task_order = i
