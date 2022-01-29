@@ -8,6 +8,13 @@ from frappe import _
 from frappe.utils import now_datetime, time_diff_in_hours
 from frappe.utils.user import get_system_managers
 
+
+def on_task_validate(doc, handler=None):
+	doc.depends_on_tasks = ""
+	doc.update_depends_on()
+	doc.populate_depends_on = lambda *args, **kwargs: None
+
+
 def on_issue_after_insert(doc, handler=None):
 	beat = frappe.new_doc("Ticket Work Beat")
 	beat.update({

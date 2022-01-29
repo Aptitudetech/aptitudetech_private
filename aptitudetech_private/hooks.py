@@ -59,7 +59,7 @@ app_license = "MIT"
 # Permissions evaluated in scripted ways
 
 permission_query_conditions = {
- 	"Issue": "aptitudetech_private.permissions.get_issue_permissions_query_conditions",
+# 	"Issue": "aptitudetech_private.permissions.get_issue_permissions_query_conditions",
 }
 
 #has_permission = {
@@ -71,19 +71,22 @@ permission_query_conditions = {
 # Hook on document methods and events
 
 doc_events = {
+	"Task": {
+		"validate": "aptitudetech_private.events.on_task_validate"
+	}
 #	"Task": {
 #		"onload": "aptitudetech_private.events.on_issue_onload"
 #	}
-	"Issue": {
-		"validate" : "aptitudetech_private.events.on_issue_validate",
-		"after_insert": "aptitudetech_private.events.on_issue_after_insert",
-		"on_trash": "aptitudetech_private.events.on_issue_trash",
-	},
-        "Project": {
-                "onload": "aptitudetech_private.events.on_project_onload",
-		"validate": "aptitudetech_private.events.on_project_validate"
-        },
-
+#	"Issue": {
+#		"validate" : "aptitudetech_private.events.on_issue_validate",
+#		"after_insert": "aptitudetech_private.events.on_issue_after_insert",
+#		"on_trash": "aptitudetech_private.events.on_issue_trash",
+#	},
+#        "Project": {
+#                "onload": "aptitudetech_private.events.on_project_onload",
+#		"validate": "aptitudetech_private.events.on_project_validate"
+#        },
+#
 # 	"*": {
 # 		"on_update": "method",
 # 		"on_cancel": "method",
