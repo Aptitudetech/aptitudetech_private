@@ -73,7 +73,10 @@ permission_query_conditions = {
 doc_events = {
 	"Task": {
 		"validate": "aptitudetech_private.events.on_task_validate"
-	}
+	},
+        "Issue": {
+                "on_update": "apititudetech_private.events.on_issue_on_update"
+        }
 #	"Task": {
 #		"onload": "aptitudetech_private.events.on_issue_onload"
 #	}
@@ -170,5 +173,8 @@ fixtures = [
 },
 {
 	'dt': 'Issue Type'
+},
+{
+        'dt': 'Custom Field'
 }
 ]

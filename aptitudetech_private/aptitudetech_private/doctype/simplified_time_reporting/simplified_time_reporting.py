@@ -55,7 +55,7 @@ class SimplifiedTimeReporting(Document):
 		self.posting_date = datetime.strptime(str(_now).split('.')[:-1][0], '%Y-%m-%d %H:%M:%S')
 
 		self.total_reported_time = self.get_total_reported_time()
-                self.total_captured_time = self.get_total_captured_time()
+		self.total_captured_time = self.get_total_captured_time()
 
 	def on_submit(self):
 		import json
@@ -133,8 +133,8 @@ class SimplifiedTimeReporting(Document):
 		
 		for issue in issues:
 			end_time_obj = datetime.strptime(issue['captured_end_working_time'].split('.')[0], '%Y-%m-%d %H:%M:%S')
-                        start_time_obj = datetime.strptime(issue['captured_start_working_time'].split('.')[0], '%Y-%m-%d %H:%M:%S')
-                        diff_time = self.get_diff_time(start_time_obj, end_time_obj)
+			start_time_obj = datetime.strptime(issue['captured_start_working_time'].split('.')[0], '%Y-%m-%d %H:%M:%S')
+			diff_time = self.get_diff_time(start_time_obj, end_time_obj)
 
 #			diff_time = self.get_diff_time(issue['captured_start_working_time'], issue['captured_end_working_time'])
 			total_captured_time = total_captured_time + diff_time

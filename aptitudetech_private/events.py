@@ -40,6 +40,14 @@ def on_issue_after_insert(doc, handler=None):
     task.save()
 
 
+def on_issue_on_update(doc, handler=None):
+    import html2text
+
+    if frappe.db.count('Communication', {'reference_doctype': doc.doctype, 'reference_name': doc.name, 'sent_or_received': 'Received'}) == 1:
+        email = frappe.db.exists('Communication', {'reference_doctype': doc.doctype, 'reference_name': doc.name, 'sent_or_received': 'Received'}, 'content')
+        doc.db_set("description", html2text.html2text(frappe.db.get_value("Communication", email, "content")))
+
+
 def on_issue_validate(doc, handler=None):
     """Handle issue kanban transitions and compute work times
     """
@@ -75,6 +83,7 @@ def on_issue_validate(doc, handler=None):
             if contact and not doc.contact:
                 doc.contact = contact
     else:
+        
         # Pull actual kanban status from database
         actual_kanban_status = frappe.db.get_value(doc.doctype, doc.name, 'kanban_status')
 
