@@ -75,7 +75,11 @@ doc_events = {
 		"validate": "aptitudetech_private.events.on_task_validate"
 	},
         "Issue": {
-                "on_update": "apititudetech_private.events.on_issue_on_update"
+                "onload": "aptitudetech_private.events.on_issue_onload",
+                "on_update": "aptitudetech_private.events.on_issue_on_update"
+        },
+        "Communication": {
+               # "on_update": "aptitudetech_private.events.on_communication_on_update"
         }
 #	"Task": {
 #		"onload": "aptitudetech_private.events.on_issue_onload"

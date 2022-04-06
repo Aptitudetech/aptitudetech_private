@@ -17,6 +17,9 @@ def on_task_validate(doc, handler=None):
 	doc.populate_depends_on = lambda *args, **kwargs: None
 
 
+def on_issue_on_update(doc, handler=None):
+    pass
+
 def on_issue_after_insert(doc, handler=None):
     beat = frappe.new_doc("Ticket Work Beat")
     beat.update({
@@ -40,12 +43,44 @@ def on_issue_after_insert(doc, handler=None):
     task.save()
 
 
+def on_issue_onload(doc, handler=None):
+    import html2text
+
+    email = frappe.db.get_list('Communication', 
+                filters={
+                    'reference_doctype': doc.doctype,
+                    'reference_name': doc.name,
+                    'sent_or_received': 'Received'},
+                limit_page_length=1,
+                order_by='creation asc')
+    if email:
+        doc.description = html2text.html2text(frappe.db.get_value("Communication", email[0].name, "content")).replace("\n", "<br>")
+        sender_by = frappe.db.get_value("Communication", email[0].name, "sender")
+        if sender_by:
+            customer = frappe.db.exists("Customer", {"website": sender_by.split("@")[1]})
+            if customer and not doc.customer:
+                doc.customer = customer
+
+    if frappe.db.count('Communication', {'reference_doctype': doc.doctype, 'reference_name': doc.name, 'sent_or_received': 'Sent'}) and doc.status == 'Open':
+        doc.status = 'Replied'
+
+
 def on_issue_on_update(doc, handler=None):
     import html2text
 
     if frappe.db.count('Communication', {'reference_doctype': doc.doctype, 'reference_name': doc.name, 'sent_or_received': 'Received'}) == 1:
         email = frappe.db.exists('Communication', {'reference_doctype': doc.doctype, 'reference_name': doc.name, 'sent_or_received': 'Received'}, 'content')
-        doc.db_set("description", html2text.html2text(frappe.db.get_value("Communication", email, "content")))
+        doc.db_set("description", html2text.html2text(frappe.db.get_value("Communication", email, "content")).replace('\n', "<br>"))
+
+
+def on_communication_on_update(doc, handle=None):
+    if doc.reference_doctype == "Issue" and doc.sent_or_received == "Sent" and frappe.db.get_value("Issue", doc.reference_name, "status") == "Open":
+        frappe.db.set_value(doc.reference_doctype, doc.reference_name, "status", "Replied")
+        sender_domain = doc.sender.split("@")[0]
+        customer = frappe.db.exists("Customer", {"website": sender_domain})
+        if customer:
+            frappe.db.set_value(doc.reference_doctype, doc.reference_name, "customer", customer)
+
 
 
 def on_issue_validate(doc, handler=None):
