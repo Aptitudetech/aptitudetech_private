@@ -20,7 +20,7 @@ def execute(filters=None):
         conditions = "ts.docstatus = 1"
         if filters.get("customer"):
                 conditions += " and p.customer = %(customer)s"
-	if filters.get("from_date"):
+        if filters.get("from_date"):
                 conditions += " and tsd.from_time >= timestamp(%(from_date)s, %(from_time)s)"
         if filters.get("to_date"):
                 conditions += " and tsd.to_time <= timestamp(%(to_date)s, %(to_time)s)"
